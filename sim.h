@@ -1,5 +1,4 @@
 
-
 BinMessage * screen_cfg_set(cJSON *cjsonRoot);
 
 BinMessage * switch_cfg_set(cJSON* cJsonRoot);
