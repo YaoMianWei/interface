@@ -9,6 +9,7 @@
 
 
 //组合单包指令
+
 static BinMessage* sim_join_package(cJSON* cjsonRoot, JsonParseFunc parse)
 {
 	return_val_if_fail(cjsonRoot, NULL);
