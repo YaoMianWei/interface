@@ -1,4 +1,5 @@
 
+
 int split_time_string(uint8_t* timeString, int* openHour, int* openMin, int* closHour, int* closeMin);
 
 int split_time(uint8_t* timeString, int* hour, int* min);
