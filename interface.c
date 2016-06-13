@@ -7,7 +7,7 @@
 #include"sim.h"
 #include"memory.h"
 #include"utils.h"
-
+#include"mul.h"
 
 //组合单包指令
 
@@ -166,7 +166,6 @@ static BinMessage* sim_join_package(cJSON* cjsonRoot, JsonParseFunc parse)
 
 
 //组合多包指令
-#if 0
 static BinMessage* mul_join_package(cJSON* cjson)
 {
 	return_val_if_fail(cjson, NULL);
@@ -196,8 +195,6 @@ static BinMessage* mul_join_package(cJSON* cjson)
 	}
 
 	uint32_t proLen = add_head_tail(proBuf, proBufLen);
-
-	buf_print(proBuf, proLen);
 
 	uint32_t contentLen = 0;
 
@@ -286,7 +283,6 @@ static BinMessage* mul_join_package(cJSON* cjson)
 	return binRet;
 }
 
-#endif
 
 //json解析接口
 BinMessage * interface_json_to_bin(uint8_t* jsonString)
@@ -298,6 +294,13 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 	cJSON *root = cJSON_Parse(jsonString);
 
 	return_val_if_fail(root, NULL);
+
+	//获取流水号
+	cJSON *cjson_sno = cJSON_GetObjectItem(root, "sno");
+	
+	return_val_if_fail(cjson_sno, NULL);
+
+	GSNO = cjson_sno->valueint;
 
 	cJSON *cmd = cJSON_GetObjectItem(root, "cmd");
 	if(cmd)
@@ -363,7 +366,6 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 		}
 	}
 
-#if 0
 
 	cJSON *pktsProgram = cJSON_GetObjectItem(root, "pkts_program");
 	if(pktsProgram)
@@ -374,8 +376,6 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 
 		return binRet;
 	}
-
-#endif
 
 	cJSON_Delete(root);
 	

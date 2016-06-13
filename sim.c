@@ -97,11 +97,9 @@ BinMessage* screen_cfg_set(cJSON *cjsonRoot)
 
 	bm_ret->binLen = 12;
 
-//	bm_ret->oldSno = sno;
+	bm_ret->oldSno = sno;
 
-//	bm_ret->newSno = ++GSNO;
-
-	GSNO = sno;
+	bm_ret->newSno = GSNO;
 
 	uint32_t ids_dev_len = strlen(ids_dev);
 
@@ -241,11 +239,11 @@ BinMessage * switch_cfg_set(cJSON* cJsonRoot)
 
 	bin_ret->type = 0;
 
-//	bin_ret->newSno = ++GSNO;
+	bin_ret->newSno = GSNO;
 
-//	bin_ret->oldSno = sno;
+	bin_ret->oldSno = sno;
 
-	GSNO = sno;
+//	GSNO = sno;
 
 	return bin_ret;
 }
@@ -404,11 +402,11 @@ BinMessage * light_cfg_set(cJSON* cJsonRoot)
 
 	bin_ret->devLen += ids_dev_len;
 
-//	bin_ret->newSno = ++GSNO;
+	bin_ret->newSno = GSNO;
 
-//	bin_ret->oldSno = cjson_sno->valueint;
+	bin_ret->oldSno = cjson_sno->valueint;
 
-	GSNO = cjson_sno->valueint;
+//	GSNO = cjson_sno->valueint;
 
 	bin_ret->type = 0;
 
@@ -591,11 +589,11 @@ BinMessage * net_cfg_set(cJSON* cJsonRoot)
 
 	bin_ret->devLen = dev_ids_len;
 
-//	bin_ret->newSno = ++GSNO;
+	bin_ret->newSno = GSNO;
 
-//	bin_ret->oldSno = sno;
+	bin_ret->oldSno = sno;
 
-	GSNO = sno;
+//	GSNO = sno;
 
 	return bin_ret;
 }
@@ -681,11 +679,11 @@ BinMessage * param_cfg_get(cJSON* cJsonRoot)
 
 	bm_ret->binLen = 4;
 
-//	bm_ret->newSno = ++GSNO;
+	bm_ret->newSno = GSNO;
 
-//	bm_ret->oldSno = sno;
+	bm_ret->oldSno = sno;
 
-	GSNO = sno;
+//	GSNO = sno;
 
 	uint32_t ids_dev_len = strlen(ids_dev);
 

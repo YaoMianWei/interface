@@ -1,2 +1,2 @@
 all:
-	gcc interface.c sim.c cJSON.c memory.c utils.c -o interface -lm 
+	gcc --share interface.c sim.c mul.c pic.c cJSON.c memory.c utils.c -o libinterface.so -lm 

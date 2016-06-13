@@ -90,4 +90,8 @@ typedef BinMessage* (JsonParseFunc)(cJSON* cJsonRoot);
 //json转bin接口
 BinMessage * interface_json_to_bin(uint8_t* jsonString);
 
+void buf_print(uint8_t* buf, int length);
+
+void bm_print(BinMessage *bm);
+
 #endif
