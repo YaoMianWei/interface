@@ -6,6 +6,7 @@
 #include"interface.h"
 #include"sim.h"
 #include"memory.h"
+#include"utils.h"
 
 
 //组合单包指令
@@ -49,20 +50,22 @@ static BinMessage* sim_join_package(cJSON* cjsonRoot, JsonParseFunc parse)
 	memcpy(bmRet->binMess + bmRet->binLen, bmRet->devIds, bmRet->devLen);
 	
 	bmRet->binLen += bmRet->devLen;
+
+	uint32_t dataLenPos = bmRet->binLen;
 	
-	bmRet->binMess[bmRet->binLen] = (dataLen+14) & 0xff;
-	
-	bmRet->binLen ++;
-	
-	bmRet->binMess[bmRet->binLen] = (dataLen+14) >> 8;
+	bmRet->binMess[bmRet->binLen] = 0x00;  //(dataLen+14) & 0xff;
 	
 	bmRet->binLen ++;
 	
-	bmRet->binMess[bmRet->binLen] = (dataLen+14) >> 16;
+	bmRet->binMess[bmRet->binLen] = 0x00;  //(dataLen+14) >> 8;
 	
 	bmRet->binLen ++;
 	
-	bmRet->binMess[bmRet->binLen] = (dataLen+14) >> 24;
+	bmRet->binMess[bmRet->binLen] = 0x00;  //(dataLen+14) >> 16;
+	
+	bmRet->binLen ++;
+	
+	bmRet->binMess[bmRet->binLen] = 0x00;  //(dataLen+14) >> 24;
 	
 	bmRet->binLen ++;
 
@@ -139,8 +142,25 @@ static BinMessage* sim_join_package(cJSON* cjsonRoot, JsonParseFunc parse)
 
 	bmRet->binMess[bmRet->binLen] = 0xae;
 
-	bmRet->binLen++;	
+	bmRet->binLen++;
+
+	//转义
+	int startPos = 4 + bmRet->devLen + 4 + 1; //从cmd中的a5位置开始转义
+
+	int escapeLen = bmRet->binLen - startPos - 1;
 	
+	int addLen = escape_sequence(bmRet->binMess, startPos, bmRet->binLen-1, escapeLen);		
+
+	escapeLen = dataLen + 14 + addLen;
+
+	bmRet->binMess[dataLenPos] = escapeLen & 0xff;
+
+	bmRet->binMess[dataLenPos + 1] = escapeLen >> 8;
+
+	bmRet->binMess[dataLenPos + 2] = escapeLen >> 16;
+
+	bmRet->binMess[dataLenPos + 3] = escapeLen >> 24;
+ 
 	return bmRet;
 }
 
