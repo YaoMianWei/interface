@@ -7,6 +7,9 @@
 #include<SDL/SDL.h>
 #include<SDL/SDL_ttf.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct _FontInfo
 {
@@ -23,5 +26,9 @@ typedef struct _PartContent
 }PartContent;
 
 int save_bmp_unicode(uint16_t* text, int textLen, const FontInfo* FontInfo, const PartContent* pc);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif 

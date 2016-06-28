@@ -10,7 +10,6 @@
 #include"mul.h"
 
 //组合单包指令
-
 static BinMessage* sim_join_package(cJSON* cjsonRoot, JsonParseFunc parse)
 {
 	return_val_if_fail(cjsonRoot, NULL);
@@ -61,12 +60,20 @@ static BinMessage* sim_join_package(cJSON* cjsonRoot, JsonParseFunc parse)
 	
 	bmRet->binLen ++;
 	
-	bmRet->binMess[bmRet->binLen] = 0x00;  //(dataLen+14) >> 16;
+	bmRet->binMess[bmRet->binLen] = 0x00;  //(alldataLen+14) >> 16;
 	
 	bmRet->binLen ++;
 	
-	bmRet->binMess[bmRet->binLen] = 0x00;  //(dataLen+14) >> 24;
+	bmRet->binMess[bmRet->binLen] = 0x00;  //(alldataLen+14) >> 24;
 	
+	bmRet->binLen ++;
+
+	bmRet->binMess[bmRet->binLen] = 0x00;  //dataLen
+
+	bmRet->binLen ++;
+
+	bmRet->binMess[bmRet->binLen] = 0x00;
+
 	bmRet->binLen ++;
 
 	uint32_t headPos = bmRet->binLen; 
@@ -153,13 +160,17 @@ static BinMessage* sim_join_package(cJSON* cjsonRoot, JsonParseFunc parse)
 
 	escapeLen = dataLen + 14 + addLen;
 
-	bmRet->binMess[dataLenPos] = escapeLen & 0xff;
+	bmRet->binMess[dataLenPos] = (escapeLen + 2) & 0xff;
 
-	bmRet->binMess[dataLenPos + 1] = escapeLen >> 8;
+	bmRet->binMess[dataLenPos + 1] = (escapeLen + 2) >> 8;
 
-	bmRet->binMess[dataLenPos + 2] = escapeLen >> 16;
+	bmRet->binMess[dataLenPos + 2] = (escapeLen + 2) >> 16;
 
-	bmRet->binMess[dataLenPos + 3] = escapeLen >> 24;
+	bmRet->binMess[dataLenPos + 3] = (escapeLen + 2) >> 24;
+
+	bmRet->binMess[dataLenPos + 4] = (escapeLen) & 0xff;
+
+	bmRet->binMess[dataLenPos + 5] = (escapeLen) >> 8;
  
 	return bmRet;
 }
@@ -285,9 +296,9 @@ static BinMessage* mul_join_package(cJSON* cjson)
 
 
 //json解析接口
-BinMessage * interface_json_to_bin(uint8_t* jsonString)
+BinMessage * interface_json_to_bin(char* jsonString)
 {
-	cJSON *cmdPsub;
+	cJSON *cmdPsub = NULL;
 
 	BinMessage *binRet = NULL;
 	
@@ -309,6 +320,10 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 		if(cmdPsub)
 		{
 			binRet = sim_join_package(root, screen_cfg_set);
+			if(binRet)
+			{
+				binRet->newSno = GSNO;
+			}
 
 			cJSON_Delete(root);
 
@@ -319,6 +334,10 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 		if(cmdPsub)
 		{
 			binRet = sim_join_package(root, switch_cfg_set);
+			if(binRet)
+			{
+				binRet->newSno = GSNO;
+			}
 
 			cJSON_Delete(root);
 
@@ -329,6 +348,10 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 		if(cmdPsub)
 		{
 			binRet = sim_join_package(root, light_cfg_set);
+			if(binRet)
+			{
+				binRet->newSno = GSNO;
+			}
 
 			cJSON_Delete(root);
 
@@ -339,6 +362,10 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 		if(cmdPsub)
 		{
 			binRet = sim_join_package(root, net_cfg_set);
+			if(binRet)
+			{
+				binRet->newSno = GSNO;
+			}
 
 			cJSON_Delete(root);
 
@@ -349,6 +376,10 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 		if(cmdPsub)
 		{
 			binRet = sim_join_package(root, gprs_cfg_set);
+			if(binRet)
+			{
+				binRet->newSno = GSNO;
+			}
 
 			cJSON_Delete(root);
 
@@ -359,6 +390,10 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 		if(cmdPsub)
 		{
 			binRet = sim_join_package(root, param_cfg_get);
+			if(binRet)
+			{
+				binRet->newSno = GSNO;
+			}
 
 			cJSON_Delete(root);
 
@@ -371,6 +406,10 @@ BinMessage * interface_json_to_bin(uint8_t* jsonString)
 	if(pktsProgram)
 	{
 		binRet = mul_join_package(root);
+		if(binRet)
+		{
+			binRet->newSno = GSNO;
+		}
 
 		cJSON_Delete(root);
 

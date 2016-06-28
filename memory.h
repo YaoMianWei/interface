@@ -1,5 +1,10 @@
 
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 BinMessage* bin_message_new();
 
 void bin_message_destroy(BinMessage* bm);
@@ -13,3 +18,9 @@ int memory_manage(MmManage* mm, uint8_t* data, uint32_t dataLen);
 ParamContent* param_content_new();
 
 void* param_content_destroy(ParamContent* pc);
+
+#ifdef __cplusplus
+}
+#endif
+
+

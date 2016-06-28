@@ -1,6 +1,10 @@
 
 #include"interface.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int add_head_tail(uint8_t* dataBuf, uint32_t dataLen);
 
 int get_time_info(cJSON* cJsonRoot, uint8_t* timeBuf);
@@ -37,4 +41,9 @@ uint8_t * (*get_every_part_content[])(cJSON* cJsonRoot, uint32_t type, uint32_t*
 	get_profits //处理字幕的函数地址
 };
 #endif
+
+#ifdef __cplusplus
+}
+#endif
+
 

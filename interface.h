@@ -5,13 +5,45 @@
 
 #include"cJSON.h"
 
+#ifdef __cplusplus  
+extern "C" {  
+#endif  
+
+
 
 #define return_val_if_fail(p,ret) if(!(p))\
 {printf("%s:%d warning "#p" failed.\n",\
 		__func__, __LINE__); return (ret);}
 
+
+//默认参数
 #define MALLOCSIZE 1024
 
+#define COMMOMTEXTSIZE 512
+
+#define UTFTOGB 2
+
+#define ANMITYPE 1
+
+#define ANMISPEED 10
+
+#define ANMITIME 3
+
+#define FONTSIZE 2
+
+#define FONTCOLOR 1
+
+#define MOD8 8
+
+#define AUDIOSPEEKER 1
+
+#define AUDIOSPEED 10
+
+#define AUDIOHINT 1
+
+#define AUDIOCOUNTPALY 10
+
+#define AUDIOTONE 10
 
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
@@ -88,10 +120,14 @@ typedef BinMessage* (JsonParseFunc)(cJSON* cJsonRoot);
 //BinMessage* mul_join_package(cJSON* cjsonRoot);
 
 //json转bin接口
-BinMessage * interface_json_to_bin(uint8_t* jsonString);
+BinMessage * interface_json_to_bin(char* jsonString);
 
 void buf_print(uint8_t* buf, int length);
 
 void bm_print(BinMessage *bm);
+
+#ifdef __cplusplus  
+}  
+#endif
 
 #endif

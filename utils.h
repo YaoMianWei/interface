@@ -1,6 +1,10 @@
 
 #include"interface.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int split_time_string(uint8_t* timeString, int* openHour, int* openMin, int* closHour, int* closeMin);
 
 int split_time(uint8_t* timeString, int* hour, int* min);
@@ -15,4 +19,7 @@ uint32_t match_color(uint32_t color);
 
 int week_ctr(cJSON* week);
 
+#ifdef __cplusplus
+}
+#endif
 

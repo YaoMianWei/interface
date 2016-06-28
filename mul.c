@@ -10,13 +10,15 @@
 
 uint8_t * (*get_every_part_content[])(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, ParamContent* pc) = 
 {
-	get_commom_text,  //处理普通文本的函数地址
+	get_commom_text,  //处理普通文本的函数入口
 	
-	get_bmp, //处理bmp函数地址
+	get_bmp, //处理bmp函数入口
 	
-	get_CTH_text, //处理时间文本 倒计时 温湿度函数地址
+	get_CTH_text, //处理时间文本 倒计时 温湿度函数入口
 
-	get_profits //处理字幕的函数地址
+	get_profits, //处理字幕的函数入口
+	
+	get_text_audio  //处理语音的函数入口
 };
 
 //时钟文本替换{YYYY} {MM} {DD} {hh} {mm} {ss} {w}
@@ -55,11 +57,11 @@ static void clock_text_ctr(uint8_t* text)
 static void timing_text_ctr(uint8_t* text, char* dest)
 {
 
-	replace(text, "{T}", dest);
+	replace_substr_to_deststr(text, "{T}", dest);
 
 	uint8_t N[5] = {0x1c, 0x1d, 0x1e, 0x1f};
 
-	replace(text, "{N}", N);
+	replace_substr_to_deststr(text, "{N}", N);
 }
 
 //问世读替换{T}和{H}
@@ -69,9 +71,9 @@ static void humidtemp_text_ctr(uint8_t* text)
 
 	uint8_t H[3] = {4,5};
 
-	replace(text, "{T}", T);
+	replace_substr_to_deststr(text, "{T}", T);
 
-	replace(text, "{H}", H);
+	replace_substr_to_deststr(text, "{H}", H);
 }
 
 
@@ -773,13 +775,17 @@ static uint8_t* get_bmp_effect_data(cJSON* cJsonRoot, char* filePath, ParamConte
 		part_height = bmp_height;
 	}
 
+	printf("get_bmp_effect_data\n");
+
 	if(bmp_width == 0 || bmp_height == 0)
 	{
+		printf("bmp_width == 0 || bmp_height == 0\n");
 		return NULL;
 	}
 
 	if(part_height > bmp_height && part_width > bmp_width)
 	{
+		printf("part_height > bmp_height && part_width > bmp_width\n");
 		return NULL;
 	}
 
@@ -1134,8 +1140,6 @@ uint8_t* get_profits(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, Para
 
 	int unicode_len = wcslen(unicode);
 
-	printf("unicode_len:%d\n",unicode_len);
-
 	int i;
 
 	uint16_t buf[unicode_len + 1];
@@ -1151,7 +1155,7 @@ uint8_t* get_profits(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, Para
 
 	SDL_Color RGB_Red = { 255, 0, 0 };
 
-	FontInfo font_info = {.size = 20, .type = "./FZDBSJW.TTF", .color = RGB_Red};
+	FontInfo font_info = {.size = 20, .type = "./font/FZDBSJW.TTF", .color = RGB_Red};
 
 	PartContent part_content = {.width = 128, .height = 32};
 
@@ -1174,45 +1178,65 @@ uint8_t* get_profits(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, Para
 
 uint8_t* get_bmp(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, ParamContent* pc)
 {
+	printf("get_bmp1\n");
+
 	return_val_if_fail(cJsonRoot, NULL);
 
 	cJSON *cjson_bmp = cJSON_GetObjectItem(cJsonRoot, "data_bmp");
 
 	return_val_if_fail(cjson_bmp, NULL);
 
-	uint32_t net_bmp_len = strlen(cjson_bmp->valuestring);
+	int net_bmp_len = strlen(cjson_bmp->valuestring);
+
+//	printf("cjson_bmp->valuestring : %s\n", cjson_bmp->valuestring);
 
 	delete_char(cjson_bmp->valuestring, '\r', '\n');
 
 	net_bmp_len = strlen(cjson_bmp->valuestring);
 
+	printf("cjson_bmp->valuestring:%s\n",cjson_bmp->valuestring);
+
+	printf("net_bmp_len : %d\n", net_bmp_len);
+
 	FILE *fp = NULL;
 
-	fp = fopen("./1.bmp", "wb");
+	fp = fopen("1.bmp", "wb");
 	if(!fp)
 	{
-		printf("can't open file\n");
+		printf("can't open 1.bmp\n");
 
 		return NULL;
 	}
+	
+	printf("get_bmp2\n");
 
+#if 0
 	uint8_t *decode_bmp_data = NULL;
 
-	uint32_t decode_bmp_len = 0;
+	int  decode_bmp_len = 0;
 
 	decode_bmp_data = base64_decode(cjson_bmp->valuestring, net_bmp_len, &decode_bmp_len);
-	if(!decode_bmp_data)
-	{
-		return NULL;
-	}
 
-	fwrite(decode_bmp_data, sizeof(uint8_t), decode_bmp_len, fp);
+	printf("\n");
+#endif
+	char org_string[net_bmp_len];
+
+	memset(org_string, 0, net_bmp_len);
+
+	int de_len = Base64Decode(org_string, cjson_bmp->valuestring, net_bmp_len, 1);
+
+	
+	printf("de_len: %d\n",de_len);
+
+	fwrite(org_string, sizeof(char), de_len, fp);
 
 	fclose(fp);
 
+	printf("get_bmp3\n");
+
 	uint32_t bmp_content_len = 0;
 
-	uint8_t* bmp_content_ret = get_bmp_effect_data(cJsonRoot, "./1.bmp", pc, &bmp_content_len);
+	uint8_t* bmp_content_ret = get_bmp_effect_data(cJsonRoot, "1.bmp", pc, &bmp_content_len);
 
 	return_val_if_fail(bmp_content_ret, NULL);
 
@@ -1497,7 +1521,7 @@ uint8_t* get_text_audio(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, P
 	}
 	else
 	{
-		size = 0x02;
+		size = FONTSIZE;
 	}
 
 	cJSON *cjson_color = cJSON_GetObjectItem(cJsonRoot, "color");
@@ -1509,10 +1533,10 @@ uint8_t* get_text_audio(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, P
 	}
 	else
 	{
-		color = 0x01;
+		color = FONTCOLOR;
 	}
 
-	uint32_t anmi_type = 1, anmi_speed = 10, anmi_time = 3;
+	uint32_t anmi_type = ANMITYPE, anmi_speed = ANMISPEED, anmi_time = ANMITIME;
 
 	cJSON *info_animate = cJSON_GetObjectItem(cJsonRoot, "info_animate");
 	if(info_animate)
@@ -1526,11 +1550,11 @@ uint8_t* get_text_audio(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, P
 
 	uint32_t utf_text_size = strlen(text->valuestring);
 
-	char gb_buf[2*utf_text_size];
+	char gb_buf[UTFTOGB * utf_text_size];
 
-	memset(gb_buf, 0, 2*utf_text_size);
+	memset(gb_buf, 0, UTFTOGB * utf_text_size);
 
-	u2g(text->valuestring, utf_text_size, gb_buf, 2*utf_text_size);
+	u2g(text->valuestring, utf_text_size, gb_buf, UTFTOGB * utf_text_size);
 
 	uint32_t gb_size = strlen(gb_buf);
 
@@ -1538,7 +1562,7 @@ uint8_t* get_text_audio(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, P
 
 	return_val_if_fail(param_audio, NULL);
 
-	int speeker = 1, speed = 10, hint = 1, count_play = 10, tone = 10;
+	int speeker = AUDIOSPEEKER, speed = AUDIOSPEED, hint = AUDIOHINT, count_play = AUDIOCOUNTPALY, tone = AUDIOTONE;
 
 	cJSON *pSub = cJSON_GetObjectItem(param_audio, "speaker");
 
@@ -1670,11 +1694,11 @@ uint8_t* get_text_audio(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, P
 
 	memcpy(content + length, gb_buf, strlen(gb_buf));
 
-	if(gb_size >= 255)
+	if(gb_size >= COMMOMTEXTSIZE)
 	{
-		memcpy(content + length, gb_buf, 255);
+		memcpy(content + length, gb_buf, COMMOMTEXTSIZE);
 
-		length += 255;
+		length += COMMOMTEXTSIZE;
 	}
 	else
 	{
@@ -1692,6 +1716,7 @@ uint8_t* get_text_audio(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, P
 	return content;
 }
 
+
 uint8_t* get_commom_text(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, ParamContent* pc)
 {
 	return_val_if_fail(cJsonRoot, NULL);
@@ -1705,11 +1730,11 @@ uint8_t* get_commom_text(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, 
 	cJSON *cjson_size = cJSON_GetObjectItem(cJsonRoot, "size");
 	if(cjson_size)
 	{
-		size = cjson_size->valueint/8;
+		size = cjson_size->valueint / MOD8;
 	}
 	else
 	{
-		size = 0x02;
+		size = FONTSIZE;
 	}
 
 	cJSON *cjson_color = cJSON_GetObjectItem(cJsonRoot, "color");
@@ -1721,10 +1746,10 @@ uint8_t* get_commom_text(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, 
 	}
 	else
 	{
-		color = 0x01;
+		color = FONTCOLOR;
 	}
 
-	uint32_t anmi_type = 1, anmi_speed = 10, anmi_time = 3;
+	uint32_t anmi_type = ANMITYPE, anmi_speed = ANMISPEED, anmi_time = ANMITIME;
 
 	cJSON *info_animate = cJSON_GetObjectItem(cJsonRoot, "info_animate");
 	if(info_animate)
@@ -1738,11 +1763,11 @@ uint8_t* get_commom_text(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, 
 
 	uint32_t utf_text_size = strlen(text->valuestring);
 
-	char gb_buf[2*utf_text_size];
+	char gb_buf[UTFTOGB * utf_text_size];
 
-	memset(gb_buf, 0, 2*utf_text_size);
+	memset(gb_buf, 0, UTFTOGB * utf_text_size);
 
-	u2g(text->valuestring, utf_text_size, gb_buf, 2*utf_text_size);
+	u2g(text->valuestring, utf_text_size, gb_buf, UTFTOGB * utf_text_size);
 
 	uint32_t gb_buf_size = strlen(gb_buf);
 
@@ -1772,6 +1797,8 @@ uint8_t* get_commom_text(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, 
 
 	length++;
 
+
+	//默认是从0开始，分区位置是从一开始所以加1
 	content[length] = pc->partPos + 1;
 
 	length++;
@@ -1844,11 +1871,11 @@ uint8_t* get_commom_text(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, 
 
 	length++;
 
-	if(gb_buf_size >= 255)
+	if(gb_buf_size >= COMMOMTEXTSIZE)
 	{
-		memcpy(content + length, gb_buf, 255);
+		memcpy(content + length, gb_buf, COMMOMTEXTSIZE);
 
-		length += 255;
+		length += COMMOMTEXTSIZE;
 	}
 	else
 	{
@@ -1860,7 +1887,7 @@ uint8_t* get_commom_text(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, 
 	uint32_t sum_len = add_head_tail(content,length);
 
 	*contentLen = sum_len;
-#if debug
+#if 0
 	buf_print(content, sum_len);
 #endif
 	return content;
@@ -1870,19 +1897,36 @@ uint8_t* get_commom_text(cJSON* cJsonRoot, uint32_t type, uint32_t* contentLen, 
 //将节目序列化 text 1  graphic 2 CTH 3  text_pic 4
 static int program_serialize(uint8_t* typeString)
 {
+	int ret = -1;
+
 	if(strcmp(typeString, "text")==0)
-		return 1;
+	{
+		ret = 0;
+	}
 
 	if(strcmp(typeString, "graphic") == 0)
-		return 2;
+	{
+		ret = 1;
+	}
 
 	if(strcmp(typeString, "text_clock") == 0 || 
 			strcmp(typeString, "text_temp_humid")==0 ||
 			strcmp(typeString, "text_timing") == 0)
-		return 3;
+	{
+		ret = 2;
+	}
 
 	if(strcmp(typeString, "text_pic") == 0)
-		return 4;
+	{
+		ret = 3;
+	}
+
+	if(strcmp(typeString, "text_audio") == 0)
+	{
+		ret = 4;
+	}
+
+	return ret;
 }
 
 uint8_t * get_content(cJSON* cJsonRoot, uint32_t* contentLen)
@@ -2012,6 +2056,8 @@ uint8_t * get_content(cJSON* cJsonRoot, uint32_t* contentLen)
 			cJSON *cjson_type = cJSON_GetObjectItem(item_psub, "type_item");
 
 			int type = program_serialize(cjson_type->valuestring);
+
+			return_val_if_fail(!(type < 0), NULL);
 
 			uint32_t content_len = 0;
 
