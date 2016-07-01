@@ -83,7 +83,7 @@ int memory_manage(MmManage* mm, uint8_t* data, uint32_t dataLen)
 {
 	return_val_if_fail(mm,-1);
 
-	if(mm->dataLen + dataLen > mm->mmSize)
+	if(mm->dataLen + dataLen >= mm->mmSize)
 	{
 		uint8_t tmp_buf[mm->dataLen];
 
@@ -93,19 +93,26 @@ int memory_manage(MmManage* mm, uint8_t* data, uint32_t dataLen)
 
 		free(mm->data);
 
+
 		mm->data = NULL;
 
-		mm->mmSize += (((dataLen % MALLOCSIZE) + 1) * MALLOCSIZE);
+
+		mm->mmSize = mm->mmSize + (((dataLen / MALLOCSIZE) + 1) * MALLOCSIZE);
+
 
 		mm->data = (uint8_t*)malloc(sizeof(uint8_t)*(mm->mmSize));
+
 		
 		return_val_if_fail(mm->data, -1);
+
 
 		memcpy(mm->data, tmp_buf, mm->dataLen);
 
 		memcpy(mm->data + mm->dataLen, data, dataLen);
 
+
 		mm->dataLen += dataLen;
+
 	}
 	else
 	{

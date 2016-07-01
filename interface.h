@@ -45,6 +45,20 @@ extern "C" {
 
 #define AUDIOTONE 10
 
+#define ONEPACKAGE512    512
+
+#define FONTPATHLEN 100
+
+#define FONTPATH  "./font/"
+
+#define INTERFACEDEBUG 0
+
+#define BMPPATH "pic.bmp"
+
+#define PROFITSPATH "profits.bmp" 
+
+#define UTFTOUNICODE  5
+
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;

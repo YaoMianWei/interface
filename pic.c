@@ -1,6 +1,7 @@
 
 
 #include"pic.h"
+#include"interface.h"
 
 //将图层复制到另一个图层的x，y位置
 static void apply_surface(int x, int y, SDL_Surface* pSrc, SDL_Surface* pDest)
@@ -174,7 +175,7 @@ int save_bmp_unicode(uint16_t* text, int textLen,
 
 		SDL_Color RGB_Red = {255, 0, 0};
 
-		SDL_Surface *pText = TTF_RenderUNICODE_Solid(font, subStr, RGB_Red);
+		SDL_Surface *pText = TTF_RenderUNICODE_Solid(font, subStr, fontInfo->color);
 		if(pText != NULL)
 		{
 //			SDL_SaveBMP(pText, "substr.bmp");
@@ -193,7 +194,7 @@ int save_bmp_unicode(uint16_t* text, int textLen,
 		startPos = endPos;
 	}
 
-	SDL_SaveBMP(pScreen, "unicode.bmp");
+	SDL_SaveBMP(pScreen, PROFITSPATH);
 
 	TTF_CloseFont(font);
 

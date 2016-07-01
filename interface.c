@@ -215,6 +215,7 @@ static BinMessage* mul_join_package(cJSON* cjson)
 		return NULL;
 	}
 
+
 	BinMessage *binRet = bin_message_new();
 
 	return_val_if_fail(binRet, NULL);
@@ -224,10 +225,14 @@ static BinMessage* mul_join_package(cJSON* cjson)
 	binRet->devIds = (uint8_t*)malloc(sizeof(uint8_t)*idsDevLen);
 	if(!binRet->devIds)
 	{
+		free(content);  //!!!!2016.6.30
+
 		bin_message_destroy(binRet);
 
 		return NULL;
 	}
+
+	
 
 	memcpy(binRet->devIds + binRet->devLen, idsDev, idsDevLen);
 
@@ -240,6 +245,8 @@ static BinMessage* mul_join_package(cJSON* cjson)
 	binRet->binMess = (uint8_t*)malloc(sizeof(uint8_t)*mallocLen);
 	if(!binRet->binMess)
 	{
+		free(content);
+
 		bin_message_destroy(binRet);
 
 		return NULL;
